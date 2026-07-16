@@ -18,18 +18,20 @@ export default function ProjectDetailPage() {
   const [users, setUsers] = useState([]);
   const [teams, setTeams] = useState([]);
 
-  const load = async () => {
-    try {
-      const [p, u, t] = await Promise.all([
-        api.get(`/projects/${id}`),
-        api.get("/users/all"),
-        api.get("/teams/all"),
-      ]);
-      setProject(p.data); setUsers(u.data); setTeams(t.data);
-    } catch {}
-  };
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [p, u, t] = await Promise.all([
+          api.get(`/projects/${id}`),
+          api.get("/users/all"),
+          api.get("/teams/all"),
+        ]);
+        setProject(p.data); setUsers(u.data); setTeams(t.data);
+      } catch {}
+    };
 
-  useEffect(() => { load(); }, [id]);
+    load();
+  }, [id]);
 
   if (!project) return <div className="text-sm text-muted-foreground" data-testid="project-loading">Loading…</div>;
 
