@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import api, { formatApiError } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -156,8 +156,8 @@ export default function RolesPage() {
             </thead>
             <tbody>
               {modules.map((mod) => (
-                <>
-                  <tr key={mod.key} className="border-t border-border bg-muted/10">
+                <Fragment key={mod.key}>
+                  <tr className="border-t border-border bg-muted/10">
                     <td className="px-4 py-3">
                       <Collapsible open={openSections[mod.key]} onOpenChange={(v) => setOpenSections((s) => ({ ...s, [mod.key]: v }))}>
                         <CollapsibleTrigger className="flex items-center gap-2 font-semibold" data-testid={`module-${mod.key}-toggle`}>
@@ -180,7 +180,7 @@ export default function RolesPage() {
                     ))}
                   </tr>
                   {openSections[mod.key] && mod.actions.length > 4 && (
-                    <tr className="border-t border-border">
+                    <tr key={`extra-${mod.key}`} className="border-t border-border">
                       <td className="px-4 py-2 pl-10 text-muted-foreground text-xs">Extra actions</td>
                       <td colSpan={5}>
                         <div className="flex flex-wrap gap-3 py-1">
@@ -194,7 +194,7 @@ export default function RolesPage() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
