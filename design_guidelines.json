@@ -1,0 +1,171 @@
+{
+  "design_philosophy": "Modern, light-themed Software Engineering Management System (SEMS). Focuses on extremely clear data hierarchy, high legibility, and professional aesthetics. Rejects standard SaaS 'blandness' by introducing multiple meticulously crafted light color palettes, sharp typography, and dense, usable layouts.",
+  "theme_strategy": "The platform MUST ONLY implement LIGHT themes (no dark mode). Instead of a light/dark toggle, the header will feature a 'Theme Switcher' dropdown allowing users to select between 4 distinct professional light palettes: Ocean (default), Earth, Peach, and Brutal.",
+  "typography": {
+    "strategy": "Soft Utility (Dashboard) + Tech clarity",
+    "primary_font": "Manrope",
+    "primary_font_usage": "All Headings (H1-H6), navigation links, and primary CTA buttons.",
+    "secondary_font": "IBM Plex Sans",
+    "secondary_font_usage": "Body text, tables, time logs, task descriptions, and tooltips.",
+    "scale": {
+      "h1": "text-3xl sm:text-4xl tracking-tight font-bold",
+      "h2": "text-2xl sm:text-3xl tracking-tight font-semibold",
+      "h3": "text-xl font-semibold",
+      "body": "text-sm sm:text-base leading-relaxed",
+      "labels": "text-xs tracking-[0.05em] uppercase font-semibold"
+    },
+    "installation": "Add Google Fonts links for 'Manrope' and 'IBM Plex Sans' to index.html."
+  },
+  "colors": {
+    "note": "Implement these palettes via CSS variables in index.css. Use a `data-theme` attribute on the `<html>` or `<body>` tag to switch between them.",
+    "palettes": [
+      {
+        "name": "light-ocean",
+        "description": "Default theme. Professional, calm off-whites with crisp deep blue actions.",
+        "variables": {
+          "--background": "210 20% 98%", 
+          "--foreground": "222.2 84% 4.9%",
+          "--card": "0 0% 100%",
+          "--card-foreground": "222.2 84% 4.9%",
+          "--primary": "221.2 83.2% 53.3%", 
+          "--primary-foreground": "210 40% 98%",
+          "--secondary": "210 40% 96.1%",
+          "--secondary-foreground": "222.2 47.4% 11.2%",
+          "--muted": "210 40% 96.1%",
+          "--muted-foreground": "215.4 16.3% 46.9%",
+          "--border": "214.3 31.8% 91.4%",
+          "--ring": "221.2 83.2% 53.3%"
+        }
+      },
+      {
+        "name": "light-earth",
+        "description": "Organic and grounded. Bone white backgrounds with forest green and sage accents.",
+        "variables": {
+          "--background": "40 33% 98%", 
+          "--foreground": "120 10% 10%",
+          "--card": "0 0% 100%",
+          "--card-foreground": "120 10% 10%",
+          "--primary": "142 71% 29%", 
+          "--primary-foreground": "0 0% 100%",
+          "--secondary": "120 20% 95%",
+          "--secondary-foreground": "142 71% 29%",
+          "--muted": "120 20% 95%",
+          "--muted-foreground": "120 10% 45%",
+          "--border": "120 15% 90%",
+          "--ring": "142 71% 29%"
+        }
+      },
+      {
+        "name": "light-peach",
+        "description": "Warm, inviting and modern. Soft white with coral/peach highlights.",
+        "variables": {
+          "--background": "20 50% 98%",
+          "--foreground": "20 20% 15%",
+          "--card": "0 0% 100%",
+          "--card-foreground": "20 20% 15%",
+          "--primary": "11 80% 55%",
+          "--primary-foreground": "0 0% 100%",
+          "--secondary": "20 30% 95%",
+          "--secondary-foreground": "11 80% 55%",
+          "--muted": "20 30% 95%",
+          "--muted-foreground": "20 10% 45%",
+          "--border": "20 25% 90%",
+          "--ring": "11 80% 55%"
+        }
+      },
+      {
+        "name": "light-brutal",
+        "description": "High contrast, Swiss-inspired. Stark white, pitch black elements, signal red alerts.",
+        "variables": {
+          "--background": "0 0% 100%",
+          "--foreground": "0 0% 0%",
+          "--card": "0 0% 100%",
+          "--card-foreground": "0 0% 0%",
+          "--primary": "0 0% 0%",
+          "--primary-foreground": "0 0% 100%",
+          "--secondary": "0 0% 90%",
+          "--secondary-foreground": "0 0% 0%",
+          "--muted": "0 0% 90%",
+          "--muted-foreground": "0 0% 30%",
+          "--border": "0 0% 0%",
+          "--ring": "0 0% 0%"
+        }
+      }
+    ],
+    "semantic_status_colors": {
+      "success_completed": "bg-emerald-100 text-emerald-800 border-emerald-200",
+      "warning_in_progress": "bg-amber-100 text-amber-800 border-amber-200",
+      "danger_bug_critical": "bg-rose-100 text-rose-800 border-rose-200",
+      "info_in_review": "bg-sky-100 text-sky-800 border-sky-200",
+      "neutral_backlog": "bg-slate-100 text-slate-800 border-slate-200"
+    }
+  },
+  "visual_enhancers": {
+    "borders": "Use subtle 1px borders (`border-border`) extensively to separate data points. Avoid deep shadows; rely on borders for structural clarity.",
+    "shadows": "Minimalist. Use `shadow-sm` for cards, `shadow-md` for dropdowns/modals. Do not use large blurry drop-shadows.",
+    "radius": "Keep it strictly professional. Use `rounded-md` (6px) or `rounded-sm` (4px) max. Avoid heavily rounded pill shapes for primary containers.",
+    "background_texture": "Solid flat colors. Do not use gradients on backgrounds or cards."
+  },
+  "grids_and_layouts": {
+    "dashboard_stats": "Use High Density Grid: `grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4`. Cards must have `h-full`.",
+    "kanban_board": "Horizontal flex container (`flex overflow-x-auto gap-4 pb-4`). Columns must have fixed min-width (`min-w-[300px] w-[300px]`) with `bg-muted/30` background, rounded corners, and structural padding.",
+    "page_structure": "Left sidebar (`w-64` on desktop, hidden on mobile) + Top Header (`h-16`, sticky, glassmorphism `bg-background/80 backdrop-blur-md` with `border-b`) + Main Content (`p-6 md:p-8 bg-muted/10`)."
+  },
+  "components": {
+    "buttons": "Flat, sharp borders, `rounded-md`. Must have explicit hover states: `hover:opacity-90` or `hover:bg-primary/90`.",
+    "cards": "White background (`bg-card`), 1px border (`border-border`), `shadow-sm`. Inner padding `p-5` or `p-6`.",
+    "tables": "Dense. Small text (`text-sm`). Explicit borders between rows (`border-b`). Table header (`thead`) should have `bg-muted/50` for distinction.",
+    "badges": "Used heavily for Roles, Status, and Severity. Use the `semantic_status_colors` mapped to the status. `rounded-full px-2.5 py-0.5 text-xs font-semibold border`.",
+    "inputs": "Shadcn standard, `h-10`, `rounded-md`, `border-input`, clear focus rings (`focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1`).",
+    "notifications": "Bell icon in header with a notification badge. Use Sonner for toast notifications (`top-right`)."
+  },
+  "motion": {
+    "transitions": "Micro-interactions only. 150ms ease-in-out for button hovers and dropdowns.",
+    "kanban": "Use `framer-motion` for task cards (drag drop simulation or layout animations). `<motion.div layout>` for re-ordering."
+  },
+  "media": {
+    "icons_library": "lucide-react (already installed). Use icons structurally (e.g., in sidebar, inside buttons, beside task titles).",
+    "image_urls": {
+      "company_logos": [
+        "https://images.unsplash.com/photo-1781313079038-089cfe75f7f4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMHRlY2glMjBsb2dvfGVufDB8fHx8MTc4NDE4Mzc3Mnww&ixlib=rb-4.1.0&q=85",
+        "https://images.pexels.com/photos/15863000/pexels-photo-15863000.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+      ],
+      "user_avatars": [
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
+        "https://images.unsplash.com/photo-1609371497456-3a55a205d5eb",
+        "https://images.unsplash.com/photo-1609436132311-e4b0c9370469"
+      ],
+      "team_photos": [
+        "https://images.pexels.com/photos/30004351/pexels-photo-30004351.jpeg",
+        "https://images.pexels.com/photos/30688595/pexels-photo-30688595.jpeg"
+      ]
+    },
+    "instructions": "Use user_avatars for the users table and task assignees. Use company_logos for the top-left sidebar branding. Use team_photos in the Teams page."
+  },
+  "testing": {
+    "data_testid_rules": "All interactive elements (buttons, links, form inputs, dropdown items, theme switchers, task cards) MUST include a kebab-case `data-testid` attribute based on their role (e.g., `data-testid='theme-switcher-btn'`, `data-testid='task-card-123'`, `data-testid='sidebar-nav-projects'`)."
+  },
+  "instructions_to_main_agent": {
+    "step_1": "Update `index.css` to remove dark mode and add the 4 multiple light palettes under distinct data-theme attributes (`:root`, `[data-theme='light-earth']`, etc.). Default is `:root` for ocean theme.",
+    "step_2": "Implement layout shell: Collapsible Sidebar + Sticky Header. Add Theme Switcher dropdown to the header mapping to the data-themes.",
+    "step_3": "Build dashboard with analytical Bento grid (Task counts, bugs, active projects, time).",
+    "step_4": "Implement Project page with Tabs (Overview, Tasks, Bugs, Members, Reports).",
+    "step_5": "Implement Kanban Board inside Project Tasks tab. Needs distinct columns: Backlog, InProgress, InReview, Completed.",
+    "step_6": "Implement Users and Teams CRUD tables with role badges (Super Admin, Admin, PM, Dev, etc.).",
+    "step_7": "Integrate Sonner toasts for mock real-time WebSocket notifications.",
+    "step_8": "Ensure STRICT adherence to `data-testid` attributes on every interactive node.",
+    "note": "Use `.js` / `.jsx` for files. NO TypeScript (`.ts`/`.tsx`)."
+  },
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Create depth through layered design elements with z-index hierarchy and crisp 1px borders.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur) strictly for sticky headers/navs. NOT for cards.",
+    "You MUST NOT apply universal transition (e.g., `transition: all`). Always add transitions for specific properties.",
+    "You MUST NOT center align the app container. No `.App { text-align: center; }`.",
+    "NEVER use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 etc for icons. Use lucide-react.",
+    "DO NOT use complete `transparent` background in header or overlays. Ensure readability.",
+    "Every interaction needs micro-animations - hover states, active states, focus rings.",
+    "Always use the provided image URLs. NEVER use placeholder text or dummy image services."
+  ]
+}
