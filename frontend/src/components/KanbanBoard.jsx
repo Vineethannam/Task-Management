@@ -13,12 +13,14 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { TASK_STATUSES, TASK_STATUS_LABELS, TASK_PRIORITIES, statusBadgeClass, priorityBadgeClass, hasPerm } from "@/lib/constants";
-import { Plus, MessageSquare, Clock, User as UserIcon, Trash2 } from "lucide-react";
+import { Plus, MessageSquare, Clock, User as UserIcon, Trash2, Play, Pause, Square } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useTimer, formatDuration } from "@/contexts/TimerContext";
 
 export default function KanbanBoard({ projectId, users, teams }) {
   const { user: me } = useAuth();
+  const { timer: activeTimer, elapsed: activeElapsed, start: tStart, pause: tPause, stop: tStop } = useTimer();
   const [tasks, setTasks] = useState([]);
   const [open, setOpen] = useState(false);
   const [detailTask, setDetailTask] = useState(null);
@@ -238,9 +240,47 @@ export default function KanbanBoard({ projectId, users, teams }) {
                   <Badge variant="outline" className={priorityBadgeClass(detailTask.priority)}>{detailTask.priority}</Badge>
                   <span className="text-xs text-muted-foreground font-mono">#{detailTask.id.slice(-6)}</span>
                   {detailTask.estimated_hours != null && <Badge variant="outline" className="text-[10px]">EST {detailTask.estimated_hours}h</Badge>}
+                  {detailTask.total_minutes_tracked > 0 && <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-800 border-emerald-200">Tracked {Math.round(detailTask.total_minutes_tracked)}m</Badge>}
                   {(detailTask.deadline_changes || 0) > 0 && <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-800 border-amber-200">Deadline changed {detailTask.deadline_changes}×</Badge>}
                   {(detailTask.reassign_count || 0) > 0 && <Badge variant="outline" className="text-[10px] bg-purple-50 text-purple-800 border-purple-200">Reassigned {detailTask.reassign_count}×</Badge>}
                 </div>
+
+                {/* Task Timer */}
+                {(() => {
+                  const isMine = activeTimer && activeTimer.task_id === detailTask.id;
+                  const running = isMine && activeTimer.status === "RUNNING";
+                  const paused = isMine && activeTimer.status === "PAUSED";
+                  const display = isMine ? formatDuration(activeElapsed) : formatDuration(0);
+                  return (
+                    <div className="flex items-center gap-3 p-3 rounded-md border border-primary/20 bg-primary/5" data-testid="task-timer-controls">
+                      <Clock className={`w-4 h-4 ${running ? "text-primary animate-pulse" : "text-muted-foreground"}`} />
+                      <div className="flex-1">
+                        <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Task Timer</div>
+                        <div className="font-mono text-lg font-semibold text-primary" data-testid="task-timer-elapsed">{display}</div>
+                      </div>
+                      {!isMine && (
+                        <Button size="sm" onClick={() => tStart(detailTask.id)} data-testid="task-timer-start">
+                          <Play className="w-3.5 h-3.5 mr-1" /> Start
+                        </Button>
+                      )}
+                      {running && (
+                        <Button size="sm" variant="outline" onClick={() => tPause(detailTask.id)} data-testid="task-timer-pause">
+                          <Pause className="w-3.5 h-3.5 mr-1" /> Pause
+                        </Button>
+                      )}
+                      {paused && (
+                        <Button size="sm" onClick={() => tStart(detailTask.id)} data-testid="task-timer-resume">
+                          <Play className="w-3.5 h-3.5 mr-1" /> Resume
+                        </Button>
+                      )}
+                      {isMine && (
+                        <Button size="sm" variant="outline" onClick={async () => { await tStop(detailTask.id); openDetail(await api.get(`/tasks/${detailTask.id}`).then((r) => r.data)); }} data-testid="task-timer-stop">
+                          <Square className="w-3.5 h-3.5 mr-1" /> Stop
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })()}
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{detailTask.description || "No description"}</p>
 
                 <div className="grid grid-cols-2 gap-3">

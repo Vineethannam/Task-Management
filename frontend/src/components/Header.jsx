@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import ThemeSwitcher from "./ThemeSwitcher";
 import NotificationBell from "./NotificationBell";
+import TimerWidget from "./TimerWidget";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ROLE_LABELS, roleBadgeClass } from "@/lib/constants";
@@ -27,6 +28,7 @@ export default function Header() {
         </div>
       </div>
       <div className="flex items-center gap-2 sm:gap-3">
+        <TimerWidget />
         <ThemeSwitcher />
         <NotificationBell />
         <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-border">

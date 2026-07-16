@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { TimerProvider } from "@/contexts/TimerContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import LoginPage from "@/pages/LoginPage";
@@ -27,7 +28,8 @@ function App() {
         <BrowserRouter>
           <AuthProvider>
             <NotificationProvider>
-              <Routes>
+              <TimerProvider>
+                <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route
                   path="/"
@@ -52,6 +54,7 @@ function App() {
                 </Route>
               </Routes>
               <Toaster position="top-right" richColors closeButton />
+              </TimerProvider>
             </NotificationProvider>
           </AuthProvider>
         </BrowserRouter>
