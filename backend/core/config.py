@@ -12,7 +12,7 @@ DB_NAME = os.environ["DB_NAME"]
 JWT_SECRET = os.environ["JWT_SECRET"]
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@sems.io")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "Admin@123")
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000","task-management-frontend-puce-eight.vercel.app")
 
 # ---- Auth constants
 JWT_ALGORITHM = "HS256"
