@@ -15,76 +15,19 @@ from models.schemas import LoginIn
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-# @router.post("/login")
-# async def login(body: LoginIn, response: Response):
-#     user = await db.users.find_one({"email": body.email.lower()})
-#     if not user or not verify_password(body.password, user.get("password_hash", "")):
-#         raise HTTPException(status_code=401, detail="Invalid email or password")
-#     if not user.get("active", True):
-#         raise HTTPException(status_code=403, detail="Account disabled")
-#     uid = str(user["_id"])
-#     access = create_access_token(uid, user["email"], user["role"])
-#     refresh = create_refresh_token(uid)
-#     response.set_cookie(
-#     key="access_token",
-#     value=access,
-#     httponly=True,
-#     secure=True,
-#     samesite="none",
-#     max_age=ACCESS_TOKEN_MINUTES * 60,
-#     path="/"
-# )
-
-# response.set_cookie(
-#     key="refresh_token",
-#     value=refresh,
-#     httponly=True,
-#     secure=True,
-#     samesite="none",
-#     max_age=REFRESH_TOKEN_DAYS * 86400,
-#     path="/"
-# )
-# return {"user": serialize(user), "access_token": access}
-
 @router.post("/login")
 async def login(body: LoginIn, response: Response):
     user = await db.users.find_one({"email": body.email.lower()})
-
     if not user or not verify_password(body.password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password")
-
     if not user.get("active", True):
         raise HTTPException(status_code=403, detail="Account disabled")
-
     uid = str(user["_id"])
-
     access = create_access_token(uid, user["email"], user["role"])
     refresh = create_refresh_token(uid)
-
-    response.set_cookie(
-        key="access_token",
-        value=access,
-        httponly=True,
-        secure=True,
-        samesite="none",
-        max_age=ACCESS_TOKEN_MINUTES * 60,
-        path="/",
-    )
-
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh,
-        httponly=True,
-        secure=True,
-        samesite="none",
-        max_age=REFRESH_TOKEN_DAYS * 86400,
-        path="/",
-    )
-
-    return {
-        "user": serialize(user),
-        "access_token": access,
-    }
+    response.set_cookie("access_token", access, httponly=True, secure=False, samesite="lax", max_age=ACCESS_TOKEN_MINUTES * 60, path="/")
+    response.set_cookie("refresh_token", refresh, httponly=True, secure=False, samesite="lax", max_age=REFRESH_TOKEN_DAYS * 86400, path="/")
+    return {"user": serialize(user), "access_token": access}
 
 
 @router.post("/logout")
@@ -114,15 +57,7 @@ async def refresh_token(request: Request, response: Response):
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
         access = create_access_token(str(user["_id"]), user["email"], user["role"])
-        response.set_cookie(
-            key="access_token",
-            value=access,
-            httponly=True,
-            secure=True,
-            samesite="none",
-            max_age=ACCESS_TOKEN_MINUTES * 60,
-            path="/"
-        )
+        response.set_cookie("access_token", access, httponly=True, secure=False, samesite="lax", max_age=ACCESS_TOKEN_MINUTES * 60, path="/")
         return {"ok": True}
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
