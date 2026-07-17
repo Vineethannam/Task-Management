@@ -28,6 +28,8 @@ export default function KanbanBoard({ projectId, users, teams }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [activity, setActivity] = useState([]);
+  const [subtasks, setSubtasks] = useState([]);
+  const [subtaskForm, setSubtaskForm] = useState({ title: "", assignee_id: "" });
 
   const load = useCallback(async () => {
     try {
@@ -61,13 +63,17 @@ export default function KanbanBoard({ projectId, users, teams }) {
   const openDetail = async (t) => {
     setDetailTask(t);
     setNewComment("");
+    setSubtasks([]);
+    setSubtaskForm({ title: "", assignee_id: "" });
     try {
-      const [c, a] = await Promise.all([
+      const [c, a, s] = await Promise.all([
         api.get(`/tasks/${t.id}/comments`),
         api.get(`/tasks/${t.id}/activity`),
+        api.get(`/tasks/${t.id}/subtasks`),
       ]);
       setComments(c.data);
       setActivity(a.data);
+      setSubtasks(s.data);
     } catch {}
   };
 
@@ -99,6 +105,26 @@ export default function KanbanBoard({ projectId, users, teams }) {
         api.get(`/tasks/${detailTask.id}/activity`),
       ]);
       setComments(c.data); setActivity(a.data);
+    } catch (e) { toast.error(formatApiError(e)); }
+  };
+
+  const handleAddSubtask = async () => {
+    if (!subtaskForm.title.trim()) return;
+    try {
+      await api.post("/tasks", {
+        title: subtaskForm.title,
+        description: "",
+        project_id: projectId,
+        assignee_id: subtaskForm.assignee_id || null,
+        priority: "MEDIUM",
+        status: "BACKLOG",
+        parent_id: detailTask.id,
+      });
+      setSubtaskForm({ title: "", assignee_id: "" });
+      toast.success("Subtask added");
+      const { data } = await api.get(`/tasks/${detailTask.id}/subtasks`);
+      setSubtasks(data);
+      load();
     } catch (e) { toast.error(formatApiError(e)); }
   };
 
@@ -231,6 +257,22 @@ export default function KanbanBoard({ projectId, users, teams }) {
         <DialogContent className="max-w-2xl" data-testid="task-detail-dialog">
           {detailTask && (
             <>
+              {detailTask.parent_id && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const r = await api.get(`/tasks/${detailTask.parent_id}`);
+                      openDetail(r.data);
+                    } catch {
+                      toast.error("Failed to load parent task");
+                    }
+                  }}
+                  className="text-xs text-primary hover:underline flex items-center gap-1 mb-2 self-start"
+                  data-testid="back-to-parent-btn"
+                >
+                  ← Back to parent task
+                </button>
+              )}
               <DialogHeader>
                 <DialogTitle className="pr-8">{detailTask.title}</DialogTitle>
               </DialogHeader>
@@ -321,6 +363,67 @@ export default function KanbanBoard({ projectId, users, teams }) {
                     <Input type="number" min="0" step="0.5" value={detailTask.estimated_hours ?? ""} onChange={(e) => updateTask({ estimated_hours: e.target.value ? Number(e.target.value) : null })} data-testid="task-detail-estimate" />
                   </div>
                 </div>
+
+                {!detailTask.parent_id && (
+                  <div>
+                    <div className="text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2">Subtasks</div>
+                    <div className="space-y-2 mb-3">
+                      {subtasks.map((sub) => (
+                        <div
+                          key={sub.id}
+                          className="flex items-center justify-between p-2 border border-border rounded-md hover:bg-muted/30 cursor-pointer text-sm"
+                          onClick={async () => {
+                            try {
+                              const r = await api.get(`/tasks/${sub.id}`);
+                              openDetail(r.data);
+                            } catch {}
+                          }}
+                          data-testid={`subtask-item-${sub.id}`}
+                        >
+                          <div className="font-medium truncate mr-2">{sub.title}</div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs text-muted-foreground">{userName(sub.assignee_id)}</span>
+                            <Badge variant="outline" className={statusBadgeClass(sub.status)}>{TASK_STATUS_LABELS[sub.status]}</Badge>
+                          </div>
+                        </div>
+                      ))}
+                      {subtasks.length === 0 && <div className="text-xs text-muted-foreground">No subtasks yet</div>}
+                    </div>
+
+                    <div className="border border-dashed border-border p-3 rounded-md space-y-2">
+                      <div className="text-xs font-semibold text-muted-foreground">Add Subtask</div>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Subtask title…"
+                          value={subtaskForm.title}
+                          onChange={(e) => setSubtaskForm({ ...subtaskForm, title: e.target.value })}
+                          data-testid="subtask-title-input"
+                          className="h-8 text-sm flex-1"
+                        />
+                        <Select
+                          value={subtaskForm.assignee_id || "none"}
+                          onValueChange={(v) => setSubtaskForm({ ...subtaskForm, assignee_id: v === "none" ? "" : v })}
+                        >
+                          <SelectTrigger className="w-36 h-8 text-xs" data-testid="subtask-assignee-select">
+                            <SelectValue placeholder="Assignee" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Unassigned</SelectItem>
+                            {users.map((u) => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          onClick={handleAddSubtask}
+                          size="sm"
+                          className="h-8 text-xs"
+                          data-testid="subtask-submit-btn"
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <div className="text-xs uppercase tracking-widest font-semibold text-muted-foreground mb-2">Comments</div>

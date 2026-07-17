@@ -43,7 +43,10 @@ async def list_tasks(
 
 @router.get("/by-project/{project_id}")
 async def tasks_by_project(project_id: str, user: dict = Depends(perm_dep("task.read"))):
-    docs = await db.tasks.find({"project_id": project_id}).sort("created_at", -1).to_list(2000)
+    docs = await db.tasks.find({
+        "project_id": project_id,
+        "$or": [{"parent_id": None}, {"parent_id": {"$exists": False}}]
+    }).sort("created_at", -1).to_list(2000)
     return serialize_list(docs)
 
 
@@ -59,6 +62,7 @@ async def create_task(body: TaskCreate, user: dict = Depends(perm_dep("task.crea
         "assignee_id": body.assignee_id, "team_id": body.team_id,
         "priority": body.priority, "status": body.status,
         "estimated_hours": body.estimated_hours, "due_date": body.due_date,
+        "parent_id": body.parent_id,
         "deadline_changes": 0, "reassign_count": 0,
         "total_minutes_tracked": 0,
         "created_by": str(user["_id"]),
@@ -152,3 +156,9 @@ async def add_comment(task_id: str, body: TaskComment, user: dict = Depends(perm
     doc["_id"] = r.inserted_id
     await _log_task_activity(task_id, str(user["_id"]), "COMMENTED", {"preview": body.content[:100]})
     return serialize(doc)
+
+
+@router.get("/{task_id}/subtasks")
+async def list_subtasks(task_id: str, user: dict = Depends(perm_dep("task.read"))):
+    docs = await db.tasks.find({"parent_id": task_id}).sort("created_at", 1).to_list(100)
+    return serialize_list(docs)
