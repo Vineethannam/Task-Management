@@ -320,3 +320,54 @@ class TestRBACNegative:
     def test_dev_cannot_edit_admin_role(self, dev_session):
         r = dev_session.put(f"{API}/roles/ADMIN", json={"permissions": []})
         assert r.status_code == 403
+
+
+# ---------- Subtasks ----------
+class TestSubtasks:
+    def test_subtask_lifecycle(self, admin_session):
+        projects = admin_session.get(f"{API}/projects/all").json()
+        assert projects, "no projects available for testing"
+        pid = projects[0]["id"]
+
+        # Create parent task
+        parent_payload = {
+            "title": "Parent Task Test",
+            "project_id": pid,
+            "priority": "HIGH",
+            "status": "BACKLOG",
+        }
+        r = admin_session.post(f"{API}/tasks", json=parent_payload)
+        assert r.status_code == 200
+        parent_task = r.json()
+        parent_id = parent_task["id"]
+
+        # Create subtask
+        sub_payload = {
+            "title": "Subtask Test",
+            "project_id": pid,
+            "priority": "MEDIUM",
+            "status": "BACKLOG",
+            "parent_id": parent_id,
+        }
+        r = admin_session.post(f"{API}/tasks", json=sub_payload)
+        assert r.status_code == 200
+        subtask = r.json()
+        sub_id = subtask["id"]
+        assert subtask.get("parent_id") == parent_id
+
+        # Verify subtasks retrieval endpoint
+        r = admin_session.get(f"{API}/tasks/{parent_id}/subtasks")
+        assert r.status_code == 200
+        subtasks_list = r.json()
+        assert any(s["id"] == sub_id for s in subtasks_list)
+
+        # Verify subtask is excluded from main project tasks list
+        r = admin_session.get(f"{API}/tasks/by-project/{pid}")
+        assert r.status_code == 200
+        project_tasks = r.json()
+        assert any(t["id"] == parent_id for t in project_tasks)
+        assert not any(t["id"] == sub_id for t in project_tasks)
+
+        # Cleanup
+        admin_session.delete(f"{API}/tasks/{sub_id}")
+        admin_session.delete(f"{API}/tasks/{parent_id}")

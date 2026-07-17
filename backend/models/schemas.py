@@ -72,6 +72,7 @@ class TaskCreate(BaseModel):
     status: str = "BACKLOG"
     estimated_hours: Optional[float] = None
     due_date: Optional[str] = None
+    parent_id: Optional[str] = None
 
 
 class TaskUpdate(BaseModel):
@@ -83,6 +84,7 @@ class TaskUpdate(BaseModel):
     status: Optional[str] = None
     estimated_hours: Optional[float] = None
     due_date: Optional[str] = None
+    parent_id: Optional[str] = None
 
 
 class TaskComment(BaseModel):
